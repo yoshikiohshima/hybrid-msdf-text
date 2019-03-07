@@ -1,19 +1,16 @@
-var createLayout = require('layout-bmfont-text')
+var THREE = require('three')
 var inherits = require('inherits')
 var createIndices = require('quad-indices')
 var buffer = require('three-buffer-vertex-data')
-var assign = require('object-assign')
 
 var vertices = require('./lib/vertices')
 var utils = require('./lib/utils')
 
+export var HybridMSDFShader = require('./shaders/hybrid-msdf').createHybridMSDFShader;
+
 var Base = THREE.BufferGeometry
 
-module.exports = function createTextGeometry (opt) {
-  return new TextGeometry(opt)
-}
-
-function TextGeometry (opt) {
+export function TextGeometry (opt) {
   Base.call(this)
 
   if (typeof opt === 'string') {
@@ -22,7 +19,7 @@ function TextGeometry (opt) {
 
   // use these as default values for any subsequent
   // calls to update()
-  this._opt = assign({}, opt)
+  this._opt = Object.assign({}, opt)
 
   // also do an initial setup...
   if (opt) this.update(opt)
@@ -36,26 +33,28 @@ TextGeometry.prototype.update = function (opt) {
   }
 
   // use constructor defaults
-  opt = assign({}, this._opt, opt)
+  opt = Object.assign({}, this._opt, opt)
 
   if (!opt.font) {
     throw new TypeError('must specify a { font } in options')
   }
 
-  this.layout = createLayout(opt)
+  var font = opt.font
+  var scaleFactor = opt.scaleFactor || 1
 
   // get vec2 texcoords
   var flipY = opt.flipY !== false
-
-  // the desired BMFont data
-  var font = opt.font
 
   // determine texture size from font file
   var texWidth = font.common.scaleW
   var texHeight = font.common.scaleH
 
+  if (!opt.glyphs) {return;}
+
+  var glyphs = opt.glyphs;
+
   // get visible glyphs
-  var glyphs = this.layout.glyphs.filter(function (glyph) {
+  glyphs = glyphs.filter(function (glyph) {
     var bitmap = glyph.data
     return bitmap.width * bitmap.height > 0
   })
@@ -66,6 +65,7 @@ TextGeometry.prototype.update = function (opt) {
   // get common vertex data
   var positions = vertices.positions(glyphs)
   var uvs = vertices.uvs(glyphs, texWidth, texHeight, flipY)
+  var colors = vertices.colors(glyphs, opt.defaultColor || new THREE.Color(0x000000))
   var indices = createIndices({
     clockwise: true,
     type: 'uint16',
@@ -74,8 +74,9 @@ TextGeometry.prototype.update = function (opt) {
 
   // update vertex data
   buffer.index(this, indices, 1, 'uint16')
-  buffer.attr(this, 'position', positions, 2)
+  buffer.attr(this, 'position', positions, 3)
   buffer.attr(this, 'uv', uvs, 2)
+  buffer.attr(this, 'color', colors, 3)
 
   // update multipage data
   if (!opt.multipage && 'page' in this.attributes) {
@@ -86,6 +87,9 @@ TextGeometry.prototype.update = function (opt) {
     // enable multipage rendering
     buffer.attr(this, 'page', pages, 1)
   }
+
+  this.computeBoundingSphere(scaleFactor);
+  this.computeBoundingBox(scaleFactor);
 }
 
 TextGeometry.prototype.computeBoundingSphere = function () {
@@ -101,6 +105,7 @@ TextGeometry.prototype.computeBoundingSphere = function () {
     return
   }
   utils.computeSphere(positions, this.boundingSphere)
+
   if (isNaN(this.boundingSphere.radius)) {
     console.error('THREE.BufferGeometry.computeBoundingSphere(): ' +
       'Computed radius is NaN. The ' +
