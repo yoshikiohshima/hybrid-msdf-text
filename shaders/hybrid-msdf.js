@@ -3,6 +3,7 @@ var THREE = require('three')
 export function createHybridMSDFShader (opt) {
   opt = opt || {};
   var opacity = typeof opt.opacity === 'number' ? opt.opacity : 1;
+  var alphaTest = typeof opt.alphaTest === 'number' ? opt.alphaTest : 0.0001;
   var precision = opt.precision || 'highp';
   var color = opt.color;
   var map = opt.map;
@@ -73,6 +74,7 @@ void main() {
     alpha = tex.a;  // if minified, use mipmap
   }
   glFragColor = vec4(outColor.rgb * alpha * opacity, alpha * opacity);
+  if (glFragColor.a < ${alphaTest}) discard;
 }`
   }, opt);
 };
