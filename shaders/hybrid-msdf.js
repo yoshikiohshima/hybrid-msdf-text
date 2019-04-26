@@ -87,7 +87,7 @@ void main() {
   } else {
     alpha = tex.a;  // if minified, use mipmap
   }
-  glFragColor = vec4(outColor.rgb * alpha * opacity, alpha * opacity);
+  glFragColor = vec4(outColor.rgb, alpha * opacity);
   if (glFragColor.a < ${alphaTest}) discard;
 }`;
 
@@ -126,7 +126,7 @@ void main() {
   } else {
     alpha = tex.a;  // if minified, use mipmap
   }
-  gl_FragColor = vec4(outColor.rgb * alpha * opacity, alpha * opacity);
+  gl_FragColor = vec4(outColor.rgb, alpha * opacity);
   if (gl_FragColor.a < ${alphaTest}) discard;
 }`;
 
