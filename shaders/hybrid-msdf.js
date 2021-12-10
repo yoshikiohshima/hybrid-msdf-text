@@ -1,6 +1,4 @@
-var THREE = require('three')
-
-export function createHybridMSDFShader (opt) {
+export function createHybridMSDFShader (opt, THREE) {
   opt = opt || {};
   var opacity = typeof opt.opacity === 'number' ? opt.opacity : 1;
   var alphaTest = typeof opt.alphaTest === 'number' ? opt.alphaTest : 0.0001;
