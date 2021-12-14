@@ -4,7 +4,10 @@ var utils = require('./lib/utils')
 
 export var HybridMSDFShader = require('./shaders/hybrid-msdf').createHybridMSDFShader;
 
+let cls = null;
+
 export function getTextGeometry(THREE) {
+    if (cls) {return cls;}
     class TextGeometry extends THREE.BufferGeometry {
         constructor(opt) {
             super(opt);
@@ -127,5 +130,7 @@ export function getTextGeometry(THREE) {
             utils.computeBox(positions, bbox)
         }
     }
-    return TextGeometry;
+
+    cls = TextGeometry;
+    return cls;
 }
