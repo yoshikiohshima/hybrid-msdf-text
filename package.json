@@ -9,7 +9,8 @@
     "email": "admin@croquet.io"
   },
   "dependencies": {
-    "three-buffer-vertex-data": "^1.0.0"
+      "quad-indices": "^2.0.1",
+      "three-buffer-vertex-data": "^1.0.0"
   },
   "keywords": [
     "bmfont",
@@ -34,7 +35,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/yoshikiohshima/croquet-bmfont-text.git"
-  },
-  "homepage": "https://github.com/yoshikiohshima/croquet--bmfont-text"
+    "url": "git://github.com/yoshikiohshima/hybrid-bmfont-text.git"
+  }
 }

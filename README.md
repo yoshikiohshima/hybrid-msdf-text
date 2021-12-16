@@ -1,6 +1,6 @@
-# Croquet Worldcore MSDF based text
+# Hybrid MSDF and bitmap text
 
-Derived from [three-bmfont-text](https://github.com/Jam3/three-bmfont-text) but modified to support a hybrid MSDF appraoch so that text look fine from near and far. That is, when a character is magnified, it looks totally crisp, and when a character is minified, it is unti-aliased.
+Derived from [three-bmfont-text](https://github.com/Jam3/three-bmfont-text) but modified to support a hybrid MSDF approach so that text look fine from near and far. That is, when a character is magnified, it looks totally crisp, and when a character is minified, it is anti-aliased.
 
 The package is designed to work best with Croquet Worldcore, but the implementation is generally usable for any Three.js based application.
 
@@ -61,7 +61,7 @@ let extent = {width: 600, height: 600};
 this.textGeometry.update({font, glyphs});
 let bounds = {left: 0, top: 0, bottom: extent.height, right: extent.width};
 this.fonts[fontName].material.uniforms.corners.value = new THREE.Vector4(bounds.left, bounds.top, bounds.right, bounds.bottom);
-```js
+```
 
 ## License
 
