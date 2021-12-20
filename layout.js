@@ -18,6 +18,8 @@ function number(a, b) {
 
 let cls = null;
 
+let glyphMap = new Map(); // fontName -> Map(font->glyph);
+
 export function getTextLayout(THREE) {
     if (cls) {return cls;}
     class TextLayout {
@@ -201,16 +203,16 @@ function wrapper(name) {
 function getGlyphById(font, id) {
     if (!font.chars || font.chars.length === 0) {return null;}
 
-    let glyphIdx = findChar(font.chars, id);
-    if (glyphIdx >= 0) {return font.chars[glyphIdx];}
+    let glyphIdx = findChar(font, id);
+    if (glyphIdx !== undefined) {return font.chars[glyphIdx];}
     return null;
 }
 
 function getXHeight(font) {
     for (let i = 0; i < X_HEIGHTS.length; i++) {
         let id = X_HEIGHTS[i].charCodeAt(0);
-        let idx = findChar(font.chars, id);
-        if (idx >= 0) {return font.chars[idx].height;}
+        let idx = findChar(font, id);
+        if (idx !== undefined) {return font.chars[idx].height;}
     }
     return 0;
 }
@@ -218,8 +220,8 @@ function getXHeight(font) {
 function getMGlyph(font) {
     for (let i = 0; i < M_WIDTHS.length; i++) {
         let id = M_WIDTHS[i].charCodeAt(0);
-        let idx = findChar(font.chars, id);
-        if (idx >= 0) {return font.chars[idx];}
+        let idx = findChar(font, id);
+        if (idx !== undefined) {return font.chars[idx];}
     }
     return 0;
 }
@@ -227,8 +229,8 @@ function getMGlyph(font) {
 function getCapHeight(font) {
     for (let i = 0; i < CAP_HEIGHTS.length; i++) {
         let id = CAP_HEIGHTS[i].charCodeAt(0);
-        let idx = findChar(font.chars, id);
-        if (idx >= 0) {return font.chars[idx].height;}
+        let idx = findChar(font, id);
+        if (idx !== undefined) {return font.chars[idx].height;}
     }
     return 0;
 }
@@ -255,12 +257,16 @@ function getAlignType(align) {
 
 */
 
-function findChar(array, value, start) {
-    start = start || 0;
-    for (let i = start; i < array.length; i++) {
-        if (array[i].id === value) {
-            return i;
+function findChar(font, value) {
+    if (!glyphMap.get(font)) {
+        let entry = new Map();
+        for (let i = 0; i < font.chars.length; i++) {
+            let char = font.chars[i];
+            entry.set(char.id, i);
         }
+        glyphMap.set(font, entry);
     }
-    return -1;
+
+    let map = glyphMap.get(font);
+    return map.get(value);
 }
