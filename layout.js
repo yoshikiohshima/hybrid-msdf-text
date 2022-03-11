@@ -103,6 +103,8 @@ export function getTextLayout(THREE) {
 
             let drawnStrings = opt.drawnStrings;
 
+            let fudgeFactor = opt.fudgeFactor;
+
             if (!opt.font) {
                 throw new Error('must provide a valid bitmap font');
             }
@@ -122,17 +124,16 @@ export function getTextLayout(THREE) {
                 let y = drawnString.y;
                 let style = drawnString.style;
 
-                //draw text along baseline
-                //y -= height
-
                 //the metrics for this text layout
                 this._height = height;
-                this._descender = lineHeight - baseline;
-                this._baseline = baseline;
                 this._xHeight = getXHeight(font);
                 this._capHeight = getCapHeight(font);
                 this._lineHeight = lineHeight;
                 this._ascender = lineHeight - descender - this._xHeight;
+
+                if (fudgeFactor && fudgeFactor.yoffset) {
+                    y += fudgeFactor.yoffset;
+                }
 
                 //layout each glyph
                 let lastGlyph;
