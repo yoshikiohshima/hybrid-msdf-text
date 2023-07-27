@@ -1,6 +1,6 @@
 {
   "name": "croquet-bmfont-text",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "renders BMFont files in ThreeJS with hybrid MSDF and bitmap renderer",
   "main": "index.js",
   "license": "MIT",

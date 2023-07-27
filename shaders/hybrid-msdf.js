@@ -7,8 +7,6 @@ export function createHybridMSDFShader (opt, THREE) {
   var map = opt.map;
   var negate = typeof opt.negate === 'boolean' ? opt.negate : true;
 
-  var version = opt.version || '300';
-
   // remove to satisfy r73
   delete opt.map;
   delete opt.color;
@@ -18,7 +16,7 @@ export function createHybridMSDFShader (opt, THREE) {
   delete opt.textureSize;
   delete opt.version;
 
-  var vert300 = `#version 300 es
+  var vert300 = `
 in vec2 uv;
 in vec4 position;
 in vec3 color;
@@ -34,25 +32,7 @@ void main() {
   origXY = position.xy;
 }`;
 
-  var vert100 = `
-attribute vec2 uv;
-attribute vec4 position;
-attribute vec3 color;
-uniform mat4 projectionMatrix;
-uniform mat4 modelViewMatrix;
-
-varying vec2 vUv;
-varying vec3 outColor;
-varying vec2 origXY;
-
-void main() {
-  vUv = uv;
-  outColor = color;
-  gl_Position = projectionMatrix * modelViewMatrix * position;
-  origXY = position.xy;
-}`;
-
-  var frag300 = `#version 300 es
+  var frag300 = `
 precision ${precision} float;
 uniform float opacity;
 uniform vec4 corners; // [x: left(0), y: top(0), z: right, w: bottom]
@@ -89,45 +69,6 @@ void main() {
   if (glFragColor.a < ${alphaTest}) discard;
 }`;
 
-  var frag100 = `
-#ifdef GL_OES_standard_derivatives
-#  extension GL_OES_standard_derivatives : enable
-#endif
-precision ${precision} float;
-uniform float opacity;
-uniform vec4 corners; // [x: left(0), y: top(0), z: right, w: bottom]
-uniform float textureWidth; // 512.0, or the width of the map texture
-uniform sampler2D map;
-
-varying vec3 outColor;
-varying vec2 origXY;
-varying vec2 vUv;
-
-float median(float r, float g, float b) {
-  return max(min(r, g), min(max(r, g), b));
-}
-
-bool inside(vec4 corners, vec2 origXY) {
-  return corners.x <= origXY.x &&
-         origXY.x < corners.z &&
-         corners.y <= origXY.y &&
-         origXY.y < corners.w;
-}
-void main() {
-  float alpha;
-  if (!inside(corners, origXY)) discard;
-  vec4 tex = ${negate ? '1.0 - ' : ''} texture2D(map, vUv);
-  float delta = fwidth(vUv.x) * textureWidth;
-  if (delta < 1.0) { // if magnified, use MSDF
-    float sigDist = median(tex.r, tex.g, tex.b) - 0.5;
-    alpha = clamp(sigDist/fwidth(sigDist) + 0.5, 0.0, 1.0);
-  } else {
-    alpha = tex.a;  // if minified, use mipmap
-  }
-  gl_FragColor = vec4(outColor.rgb, alpha * opacity);
-  if (gl_FragColor.a < ${alphaTest}) discard;
-}`;
-
   return Object.assign({
     uniforms: {
       opacity: { type: 'f', value: opacity },
@@ -135,7 +76,7 @@ void main() {
       corners: {value: new THREE.Vector4(0, 0, 100, 100)},
       textureWidth: {value: 512},
     },
-    vertexShader: version === '300' ? vert300 : vert100,
-    fragmentShader: version === '300' ? frag300 : frag100
+    vertexShader: vert300,
+    fragmentShader: frag300,
   }, opt);
 };
